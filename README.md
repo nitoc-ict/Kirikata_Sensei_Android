@@ -1,2 +1,2 @@
 # Kirikata_Sensei
-procon36 における「きりかた先生」開発チーム。
+procon36 における「きりかた先生」のAndroid開発用のリポジトリ。
