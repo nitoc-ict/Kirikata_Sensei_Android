@@ -45,7 +45,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-
         //暫定的にアプリが停止したタイミングでログアウト
         val sharedPref = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
         sharedPref.edit().apply {
