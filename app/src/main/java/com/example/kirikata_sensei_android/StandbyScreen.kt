@@ -54,6 +54,7 @@ fun StandbyScreenUI(onNextClick: () -> Unit) {
             Button(onClick = { onNextClick() }) {
                 Text("次の画面へ")
             }
+
         }
     }
 }
