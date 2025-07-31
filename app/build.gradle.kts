@@ -36,6 +36,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 
     packaging {
@@ -59,6 +60,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.identity.doctypes.jvm)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,4 +72,9 @@ dependencies {
     implementation(libs.socketio) {
         exclude(group = "org.json", module = "json")
     }
+
+
+    implementation("com.github.jiangdongguo.AndroidUSBCamera:libausbc:3.2.10")
+
+
 }
