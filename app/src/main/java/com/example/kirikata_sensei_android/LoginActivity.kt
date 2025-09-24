@@ -1,6 +1,5 @@
 package com.example.kirikata_sensei_android
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.kirikata_sensei_android.ui.theme.Kirikata_Sensei_AndroidTheme
@@ -57,7 +57,7 @@ class LoginActivity : ComponentActivity() {
             Kirikata_Sensei_AndroidTheme {
                 LoginScreen(onLoginSuccess = {
                     //ログイン成功時にSharedPreferencesへ保存
-                    val sharedPref = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+                    val sharedPref = getSharedPreferences("LoginPrefs", MODE_PRIVATE)
                     sharedPref.edit().apply {
                         putBoolean("isLoggedIn", true)
                         apply()
@@ -70,6 +70,7 @@ class LoginActivity : ComponentActivity() {
         }
     }
 }
+
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
@@ -84,22 +85,43 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                onClick = { /* 生徒用は後で実装 */ },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("生徒用ログイン（後日実装）")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+            // 先生用ログインボタン
             Button(
                 onClick = { showTeacherDialog = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("先生用ログイン")
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 生徒用ログインボタン（先生用の下に配置）
+            val context = LocalContext.current
+            Button(
+                onClick = {
+                    context.startActivity(Intent(context, GroupSelection::class.java))
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("生徒用ログイン")
+            }
         }
 
-        //先生用ログインダイアログ
+        // カメラ確認用ボタン（右下に配置）
+        val context = LocalContext.current
+        Button(
+            onClick = {
+                context.startActivity(Intent(context, CheckCamera::class.java))
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(8.dp)
+        ) {
+            Text("カメラ確認")
+        }
+
+
+        // 先生用ログインダイアログ
         if (showTeacherDialog) {
             TeacherLoginDialog(
                 onDismiss = { showTeacherDialog = false },
@@ -111,6 +133,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun TeacherLoginDialog(
