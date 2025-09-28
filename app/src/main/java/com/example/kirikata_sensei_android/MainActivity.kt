@@ -20,6 +20,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+
+
         //SharedPreferencesでログイン確認
         val sharedPref = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
         val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)

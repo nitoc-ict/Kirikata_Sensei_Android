@@ -1,9 +1,9 @@
 package com.example.kirikata_sensei_android
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,7 +50,6 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
-
 
 class GroupSelection : ComponentActivity(), HandLandmarkerHelper.LandmarkerListener {
     lateinit var handLandmarkerHelper: HandLandmarkerHelper
@@ -100,14 +99,14 @@ fun HandTrackingScreen(
     result: State<HandLandmarkerHelper.ResultBundle?>,
     handHelper: HandLandmarkerHelper
 ) {
+    val context = LocalContext.current
     var showLandmarks by remember { mutableStateOf(true) }
 
-    // 判定用ステート
     var countdown by remember { mutableStateOf(0) }
     var targetNumber by remember { mutableStateOf<Int?>(null) }
     var detectedNumber by remember { mutableStateOf<Int?>(null) }
     var stableFrames by remember { mutableStateOf(0) }
-    val REQUIRED_STABLE_FRAMES = 7   // 7フレーム連続一致で安定（≈0.2秒〜0.3秒）
+    val REQUIRED_STABLE_FRAMES = 7
 
     val scope = rememberCoroutineScope()
 
@@ -128,7 +127,6 @@ fun HandTrackingScreen(
                 result.value?.let { LandmarkOverlay(it) }
             }
 
-            // 両手の指の本数を合算
             val totalFingers = result.value?.results
                 ?.firstOrNull()
                 ?.landmarks()
@@ -137,10 +135,8 @@ fun HandTrackingScreen(
             if (detectedNumber == null) {
                 if (totalFingers > 0) {
                     if (targetNumber == totalFingers) {
-                        // 同じ数字が続いている → 安定フレームを増やす
                         stableFrames++
                         if (stableFrames >= REQUIRED_STABLE_FRAMES && countdown == 0) {
-                            // 安定してからカウントダウン開始
                             countdown = 3
                             scope.launch {
                                 while (countdown > 0 && targetNumber == totalFingers && detectedNumber == null) {
@@ -149,25 +145,37 @@ fun HandTrackingScreen(
                                 }
                                 if (countdown == 0 && targetNumber == totalFingers && detectedNumber == null) {
                                     detectedNumber = totalFingers
-                                    Log.d("HandSign", "確定した数字: $totalFingers")
                                     targetNumber = null
+
+                                    // ✅ グループ番号確定 → 数秒後にCookingActivityへ遷移
+                                    scope.launch {
+                                        delay(2000) // 2秒待つ
+                                        val intent = Intent(context, CookingActivity::class.java).apply {
+                                            putExtra("recipeName", "sandwich")
+                                            // HandLandmarkerHelper の設定値を渡す
+                                            putExtra("delegate", handHelper.currentDelegate)
+                                            putExtra("maxHands", handHelper.maxNumHands)
+                                            putExtra("detectionThreshold", handHelper.minHandDetectionConfidence)
+                                            putExtra("trackingThreshold", handHelper.minHandTrackingConfidence)
+                                            putExtra("presenceThreshold", handHelper.minHandPresenceConfidence)
+                                        }
+                                        context.startActivity(intent)
+                                        (context as? ComponentActivity)?.finish()
+                                    }
                                 }
                             }
                         }
                     } else {
-                        // 数字が変わったらリセット
                         targetNumber = totalFingers
                         stableFrames = 1
                         countdown = 0
                     }
                 } else {
-                    // 何もしてないときはリセット
                     targetNumber = null
                     stableFrames = 0
                     countdown = 0
                 }
             } else {
-                // 確定済み → 0に戻ったらリセット
                 if (totalFingers == 0) {
                     detectedNumber = null
                     targetNumber = null
@@ -176,7 +184,7 @@ fun HandTrackingScreen(
                 }
             }
 
-            // オーバーレイ表示
+            // ✅ オーバーレイ表示
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -188,12 +196,12 @@ fun HandTrackingScreen(
                         color = Color.Red
                     )
                     detectedNumber != null -> Text(
-                        text = "確定: $detectedNumber",
+                        text = "グループ: $detectedNumber",
                         style = MaterialTheme.typography.headlineLarge,
                         color = Color.Green
                     )
                     else -> Text(
-                        text = "何グループですか？指で教えてください",
+                        text = "何グループですか？ 指で教えてください",
                         style = MaterialTheme.typography.headlineMedium,
                         color = Color.White
                     )
@@ -212,8 +220,6 @@ fun HandTrackingScreen(
     }
 }
 
-
-
 fun countExtendedFingersImproved(landmarks: List<NormalizedLandmark>): Int {
     if (landmarks.size < 21) return 0
     var count = 0
@@ -221,12 +227,10 @@ fun countExtendedFingersImproved(landmarks: List<NormalizedLandmark>): Int {
     // 手の向き判定（左手か右手か）
     val isLeftHand = landmarks[17].x() < landmarks[5].x()
 
-    // 親指: tip(4) が IP(3), MCP(2) より外側
+    // 親指
     if (isLeftHand) {
-        // 左手 → x が大きいほど外側
         if (landmarks[4].x() > landmarks[3].x() && landmarks[4].x() > landmarks[2].x()) count++
     } else {
-        // 右手 → x が小さいほど外側
         if (landmarks[4].x() < landmarks[3].x() && landmarks[4].x() < landmarks[2].x()) count++
     }
 
@@ -244,10 +248,6 @@ fun countExtendedFingersImproved(landmarks: List<NormalizedLandmark>): Int {
 
     return count
 }
-
-
-
-
 
 @Composable
 fun CameraPreview() {
@@ -295,25 +295,17 @@ fun CameraPreview() {
 fun LandmarkOverlay(resultBundle: HandLandmarkerHelper.ResultBundle) {
     val result = resultBundle.results.firstOrNull() ?: return
 
-    // MediaPipe の手のランドマークの接続関係（21点）
     val connections = listOf(
-        // 親指
         Pair(0, 1), Pair(1, 2), Pair(2, 3), Pair(3, 4),
-        // 人差し指
         Pair(0, 5), Pair(5, 6), Pair(6, 7), Pair(7, 8),
-        // 中指
         Pair(0, 9), Pair(9, 10), Pair(10, 11), Pair(11, 12),
-        // 薬指
         Pair(0, 13), Pair(13, 14), Pair(14, 15), Pair(15, 16),
-        // 小指
         Pair(0, 17), Pair(17, 18), Pair(18, 19), Pair(19, 20),
-        // 掌の横
         Pair(5, 9), Pair(9, 13), Pair(13, 17)
     )
 
     Canvas(modifier = Modifier.fillMaxSize()) {
         result.landmarks().forEach { hand ->
-            // ランドマーク座標を変換
             val points = hand.map { lm ->
                 Offset(
                     x = lm.x() * size.width,
@@ -321,30 +313,18 @@ fun LandmarkOverlay(resultBundle: HandLandmarkerHelper.ResultBundle) {
                 )
             }
 
-            // 線を描画
-            for ((start, end) in connections) {
-                if (start < points.size && end < points.size) {
-                    drawLine(
-                        color = Color.Green,
-                        start = points[start],
-                        end = points[end],
-                        strokeWidth = 4f
-                    )
+            connections.forEach { (s, e) ->
+                if (s < points.size && e < points.size) {
+                    drawLine(Color.Green, points[s], points[e], strokeWidth = 4f)
                 }
             }
 
-            // 点を描画
-            points.forEach { point ->
-                drawCircle(
-                    color = Color.Red,
-                    radius = 6f,
-                    center = point
-                )
+            points.forEach { pt ->
+                drawCircle(Color.Red, radius = 6f, center = pt)
             }
         }
     }
 }
-
 
 @Composable
 fun HandTrackingControls(

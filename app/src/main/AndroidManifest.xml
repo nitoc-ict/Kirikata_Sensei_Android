@@ -40,6 +40,8 @@
         <activity android:name=".ManagementScreen" />
 
         <activity android:name=".GroupSelection" />
+        <activity android:name=".CookingActivity"/>
+
 
     </application>
 
