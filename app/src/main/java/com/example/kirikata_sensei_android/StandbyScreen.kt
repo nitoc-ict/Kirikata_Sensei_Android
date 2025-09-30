@@ -125,8 +125,7 @@ fun StandbyScreenUI(groupCount: Int, onNextClick: () -> Unit) {
 fun SquareBox(number: Int) {
     Box(
         modifier = Modifier
-            //後々修正.size(32.dp)
-            .aspectRatio(1f) // 縦横比を1:1に保ち、正方形にする
+            .size(128.dp, 128.dp)
             .clip(RoundedCornerShape(12.dp)) // 角を丸くする
             .background(Color(0x80808080)), // 背景色を灰色に設定
         contentAlignment = Alignment.Center
