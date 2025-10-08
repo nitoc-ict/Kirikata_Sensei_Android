@@ -13,7 +13,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,13 +22,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,8 +47,15 @@ class CreateClass : ComponentActivity() {
         setContent {
             Kirikata_Sensei_AndroidTheme {
                 CreateClassScreen(
-                    onNextClick = {
-                        startActivity(Intent(this, StandbyScreen::class.java))
+                    // onNextClickが呼ばれたときに、3つの値を受け取るように変更
+                    onNextClick = { className, groupCount, recipe ->
+                        // Intentに値を追加して次の画面に渡す
+                        val intent = Intent(this, StandbyScreen::class.java).apply {
+                            putExtra("CLASS_NAME", className)
+                            putExtra("GROUP_COUNT", groupCount)
+                            putExtra("RECIPE_NAME", recipe)
+                        }
+                        startActivity(intent)
                         finish()
                     },
                 )
@@ -64,11 +66,12 @@ class CreateClass : ComponentActivity() {
 
 @Composable
 fun CreateClassScreen(
-    onNextClick: () -> Unit
+    // ボタンが押されたときに、入力された値を渡すように引数の型を変更
+    onNextClick: (String, Int, String) -> Unit
 ) {
-
     var className by remember { mutableStateOf("") }
     var groupCount by remember { mutableIntStateOf(0) }
+    var recipe by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -76,15 +79,6 @@ fun CreateClassScreen(
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        /*
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("ここにクラス作成画面")
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { onNextClick() }) {
-                Text("次の画面へ")
-            }
-        }
-         */
         Column {
             //クラス名
             OutlinedTextField(
@@ -93,6 +87,9 @@ fun CreateClassScreen(
                 label = { Text("クラス名を入力してください") },
                 singleLine = true
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             //グループ数
             Row(
                 modifier = Modifier.wrapContentSize(),
@@ -130,23 +127,24 @@ fun CreateClassScreen(
                         modifier = Modifier.size(24.dp)
                     )
                 }
-                /**
-                OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("パスワード") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation()
-                )
-                 */
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             //レシピ選択画面
             OutlinedTextField(
-                value = className,
-                onValueChange = { className = it },
+                value = recipe,
+                onValueChange = { recipe = it },
                 label = { Text("レシピを選択") },
                 singleLine = true
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ボタンが押されたら、現在の3つの状態をonNextClickに渡す
+            Button(onClick = { onNextClick(className, groupCount, recipe) }) {
+                Text("クラスを作成して次へ")
+            }
         }
     }
 }

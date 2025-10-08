@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    implementation(libs.volley)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -91,5 +92,6 @@ dependencies {
 
     implementation ("com.google.mediapipe:tasks-vision:0.10.14")
 
-
+    //okhttp
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
