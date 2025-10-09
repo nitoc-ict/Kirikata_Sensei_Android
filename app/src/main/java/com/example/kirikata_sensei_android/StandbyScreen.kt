@@ -30,13 +30,25 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.kirikata_sensei_android.ui.theme.Kirikata_Sensei_AndroidTheme
@@ -153,7 +165,29 @@ fun StandbyScreenUI(groupCount: Int, onNextClick: (Int) -> Unit) {
                 // SquareBoxを呼び出し、表示する番号を渡す (1から始まるように +1 する)
                 SquareBox(number = number + 1)
             }
+        }
 
+        /*通知画面作成予定
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0x80808080)),
+        contentAlignment = Alignment.CenterEnd
+        ) {
+        Text(
+            text = "hello",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+        }
+         */
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ここに「全員揃ったら表示する」処理を追加
+        Button(onClick = { onNextClick() }) {
+            Text("授業を始める")
         }
 
         Log.v("count", groupCount.toString())
