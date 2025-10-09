@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Kirikata_Sensei_Android"
 include(":app")
+
