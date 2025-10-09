@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    //implementation(libs.litert.support.api)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -91,5 +92,11 @@ dependencies {
 
     implementation ("com.google.mediapipe:tasks-vision:0.10.14")
 
+
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-support-api:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.4")
+    implementation("org.tensorflow:tensorflow-lite-gpu-api:2.14.0")
 
 }
