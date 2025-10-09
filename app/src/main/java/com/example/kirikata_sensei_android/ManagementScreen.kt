@@ -51,7 +51,7 @@ class ManagementScreen : ComponentActivity() {
         setContent {
             Kirikata_Sensei_AndroidTheme {
                 ManagementScreenUI(
-                   groupCount = groupCount
+                    groupCount = groupCount
                 )
             }
         }
@@ -75,9 +75,6 @@ fun ManagementScreenUI(groupCount: Int) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            //デバッグ用
-            Log.e("count", groupCount.toString())
-
             Spacer(modifier = Modifier.weight(1f))//上スペース
 
             // グリッド状に要素を効率よく表示するためのComposable

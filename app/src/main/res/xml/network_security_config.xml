@@ -2,5 +2,10 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">bitter1326.mydns.jp</domain>
+        <domain includeSubdomains="true">bitter1326.mydns.jp/api/users</domain>
+        <domain includeSubdomains="true">163.43.209.9</domain>
+        <domain includeSubdomains="true">163.43.209.9/api/users</domain>
+        <domain includeSubdomains="true">http://163.43.209.9:3000/api/login</domain>
+        <domain includeSubdomains="true">http://163.43.209.9:3000/api/auth</domain>
     </domain-config>
 </network-security-config>
