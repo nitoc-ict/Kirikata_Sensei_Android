@@ -2,9 +2,9 @@ package com.example.kirikata_sensei_android
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,8 +32,7 @@ import com.example.kirikata_sensei_android.ui.theme.Kirikata_Sensei_AndroidTheme
 import io.socket.client.IO
 import io.socket.client.Socket
 
-
-class LoginActivity : ComponentActivity() {
+class LoginActivity : BaseActivity() {
 
     private lateinit var socket: Socket
 
@@ -41,14 +40,13 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        //Socket.IOサーバに接続（ログイン前に確立しておく）
+
+        // Socket.IOサーバに接続
         try {
             val options = IO.Options()
-            options.reconnection = true  // 再接続などオプションが必要なら追加
-
+            options.reconnection = true
             socket = IO.socket("https://deploy-backend-u68u.onrender.com", options)
             socket.connect()
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -56,13 +54,11 @@ class LoginActivity : ComponentActivity() {
         setContent {
             Kirikata_Sensei_AndroidTheme {
                 LoginScreen(onLoginSuccess = {
-                    //ログイン成功時にSharedPreferencesへ保存
                     val sharedPref = getSharedPreferences("LoginPrefs", MODE_PRIVATE)
                     sharedPref.edit().apply {
                         putBoolean("isLoggedIn", true)
                         apply()
                     }
-                    //CreateClass.ktへ遷移
                     startActivity(Intent(this, CreateClass::class.java))
                     finish()
                 })
@@ -71,31 +67,39 @@ class LoginActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     var showTeacherDialog by remember { mutableStateOf(false) }
 
+    // ✅ 隠しボタン制御用
+    var showCameraButton by remember { mutableStateOf(false) }
+    var showTflTestButton by remember { mutableStateOf(false) }
+    var showCamera2Button by remember { mutableStateOf(false) } // ← 追加！
+    var tapCount by remember { mutableStateOf(0) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable {
+                tapCount++
+                if (tapCount >= 5) {
+                    // 5回タップで全部トグル切り替え
+                    showCameraButton = !showCameraButton
+                    showTflTestButton = !showTflTestButton
+                    showCamera2Button = !showCamera2Button  // ← 追加！
+                    tapCount = 0
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // 先生用ログインボタン
-            Button(
-                onClick = { showTeacherDialog = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(onClick = { showTeacherDialog = true }, modifier = Modifier.fillMaxWidth()) {
                 Text("先生用ログイン")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // 生徒用ログインボタン（先生用の下に配置）
             val context = LocalContext.current
             Button(
                 onClick = {
@@ -107,21 +111,51 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             }
         }
 
-        // カメラ確認用ボタン（右下に配置）
-        val context = LocalContext.current
-        Button(
-            onClick = {
-                context.startActivity(Intent(context, CheckCamera::class.java))
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(8.dp)
-        ) {
-            Text("カメラ確認")
+        // ✅ 隠し「カメラ確認」ボタン
+        if (showCameraButton) {
+            val context = LocalContext.current
+            Button(
+                onClick = {
+                    context.startActivity(Intent(context, CheckCamera::class.java))
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(8.dp)
+            ) {
+                Text("カメラ確認")
+            }
         }
 
+        // ✅ 新規追加：隠し「カメラ確認２」ボタン
+        if (showCamera2Button) {
+            val context = LocalContext.current
+            Button(
+                onClick = {
+                    context.startActivity(Intent(context, CheckCamera2::class.java))
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(8.dp)
+            ) {
+                Text("カメラ確認２")
+            }
+        }
 
-        // 先生用ログインダイアログ
+        // ✅ 隠し「TFLテスト」ボタン
+        if (showTflTestButton) {
+            val context = LocalContext.current
+            Button(
+                onClick = {
+                    context.startActivity(Intent(context, TflTestActivity::class.java))
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(8.dp)
+            ) {
+                Text("TFLテスト")
+            }
+        }
+
         if (showTeacherDialog) {
             TeacherLoginDialog(
                 onDismiss = { showTeacherDialog = false },
@@ -133,6 +167,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         }
     }
 }
+
 
 
 @Composable
