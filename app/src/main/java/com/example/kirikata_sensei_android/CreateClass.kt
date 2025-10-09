@@ -6,6 +6,7 @@
 クラスを作れたらStandbyScreen.kt(待機画面)へ遷移。
  */
 
+/*
 package com.example.kirikata_sensei_android
 
 import android.content.Intent

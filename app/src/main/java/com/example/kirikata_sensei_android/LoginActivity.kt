@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -396,10 +397,26 @@ fun LoginScreen(
 ) {
     var showTeacherDialog by remember { mutableStateOf(false) }
 
+    // ✅ 隠しボタン制御用
+    var showCameraButton by remember { mutableStateOf(false) }
+    var showTflTestButton by remember { mutableStateOf(false) }
+    var showCamera2Button by remember { mutableStateOf(false) } // ← 追加！
+    var tapCount by remember { mutableStateOf(0) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable {
+                tapCount++
+                if (tapCount >= 5) {
+                    // 5回タップで全部トグル切り替え
+                    showCameraButton = !showCameraButton
+                    showTflTestButton = !showTflTestButton
+                    showCamera2Button = !showCamera2Button  // ← 追加！
+                    tapCount = 0
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -412,7 +429,7 @@ fun LoginScreen(
                 Text("生徒用ログイン（後日実装）")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
             Button(
                 onClick = { showTeacherDialog = true },

@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
             return
         }
 
+        /*
         setContent {
             Kirikata_Sensei_AndroidTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -43,6 +44,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+         */
     }
 
     override fun onStop() {
